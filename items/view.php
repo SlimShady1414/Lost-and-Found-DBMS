@@ -11,7 +11,41 @@ if(isset($_GET['id']) && $_GET['id'] > 0){
 }else{
 	echo '<script>alert("item ID is Required."); location.replace("./?page=items")</script>';
 }
+
 ?>
+
+
+<?php
+require_once('C:\xampp\htdocs\php-lfis\config.php');
+
+
+if (isset($_GET['id']) && $_GET['id'] > 0) {
+    $item_id = $_GET['id'];
+
+    // Log item view into item_views table
+    $log_view = $conn->query("INSERT INTO item_views (item_id) VALUES ($item_id)");
+
+    // Fetch item details using the procedure
+    $qry = $conn->query("CALL GetItemDetails($item_id)");
+    if ($qry->num_rows > 0) {
+        $item = $qry->fetch_assoc();
+
+        // Retrieve item details
+        $fullname = $item['fullname'] ?? "";
+        $title = $item['title'] ?? "";
+        $category = $item['category'] ?? "";
+        $contact = $item['contact'] ?? "";
+        $description = isset($item['description']) ? str_replace("\n", "<br>", $item['description']) : "";
+        $image_path = $item['image_path'] ?? "";
+    } else {
+        echo '<script>alert("Item ID is not valid."); location.replace("./?page=items")</script>';
+    }
+} else {
+    echo '<script>alert("Item ID is Required."); location.replace("./?page=items")</script>';
+}
+?>
+
+
 <style>
 	.lf-image{
 		width:400px;

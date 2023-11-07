@@ -147,11 +147,54 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `firstname`, `middlename`, `lastname`, `username`, `password`, `avatar`, `last_login`, `type`, `date_added`, `date_updated`) VALUES
-(1, 'Adminstrator', '', 'Admin', 'admin', '$2y$10$lu9Lz9d61nsRRq5aXGOrmuik6tzhMif.AIQTmxgj4LTHf3M9hyGtW', 'uploads/avatars/1.png?v=1678760026', NULL, 1, '2021-01-20 14:02:37', '2023-04-26 16:01:02'),
-(2,'PES Adminstrator','','Pesuadmin','pesuadmin','pesu123','uploads/avatars/1.png?v=1678760026',NULL,1,'2021-01-20 14:02:37', '2023-04-26 16:01:02');
+(1, 'Adminstrator', '', 'Admin', 'admin', '$2y$10$uF5efz3yEGb6Z0U7T2aVZ.3cm.T5jV/ii6VrWnxA871tNUPwNooqe', 'uploads/avatars/1.png?v=1678760026', NULL, 1, '2021-01-20 14:02:37', '2023-04-26 16:01:02'),
+(2,'PES Adminstrator','','Pesuadmin','pesuadmin','$2y$10$mPf7jmJI6M8YyEqdPoPooeNb7ApVe61QC8NYSXOxoqUQORoiGMo6u','uploads/avatars/1.png?v=1678760026',NULL,2,'2021-01-20 14:02:37', '2023-04-26 16:01:02');
 --
 -- Indexes for dumped tables
 --
+-- Trigger: Log views of items into item_views table
+CREATE TABLE IF NOT EXISTS item_views (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    item_id INT NOT NULL,
+    viewed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+DELIMITER //
+
+CREATE TRIGGER log_item_view_trigger
+AFTER INSERT ON item_list FOR EACH ROW
+BEGIN
+    INSERT INTO item_views (item_id) VALUES (NEW.id);
+END;
+//
+DELIMITER ;
+
+-- Function: Validate image path
+DELIMITER //
+
+CREATE FUNCTION ValidateImage(imagePath TEXT)
+RETURNS TEXT
+BEGIN
+    IF imagePath IS NULL OR imagePath = '' THEN
+        RETURN 'default_image.jpg'; -- Replace with your default image path
+    ELSE
+        RETURN imagePath; -- Add further validation if needed
+    END IF;
+END;
+//
+DELIMITER ;
+
+-- Procedure: Fetch item details based on ID
+DELIMITER //
+
+CREATE PROCEDURE GetItemDetails(IN itemId INT)
+BEGIN
+    SELECT *, COALESCE((SELECT `name` FROM `category_list` WHERE `category_list`.`id` = `item_list`.`category_id`), 'N/A') AS `category`
+    FROM `item_list`
+    WHERE id = itemId;
+END;
+//
+DELIMITER ;
 
 --
 -- Indexes for table `category_list`
